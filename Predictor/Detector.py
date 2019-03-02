@@ -1,38 +1,33 @@
 from __future__ import division
-import aipodMain.utilities.helper_nn_models_utils as nn_model_utils
+import ..helper_nn_models_utils as nn_model_utils
 from .AbstractPredictor import AbstractPredictor
 import numpy as np
 import sys
 import align.detect_face
 import facenet
 import tensorflow as tf
-from aipodMain.utilities.helper_data_encapsulation import OutputClassificationDataWithTracker
+from ..DataHolder import DetectionData
 import time
 
-class FacePredictor(AbstractPredictor):
+class FacePredictor(threading.Thread):
     def __init__(self,PATH_TO_LABELS,
                  image_data,
-                 output_data,
                   score_thresh,
-                 IMG_SCALE,
-                 TRACKER_TYPE = None):
+                 IMG_SCALE):
 
 
         name = "MTCNN Face Predictor"
-        ENABLE_BY_DEFAULT = True
         super().__init__(name,
                          PATH_TO_LABELS,
-                         IMG_SCALE,
-                         TRACKER_TYPE,
-                         ENABLE_BY_DEFAULT)
+                         IMG_SCALE)
 
 
         self.image_data = image_data
-        self.output_data = output_data
+        self.output_data = DetectionData()
         self.output_data.score_thresh = score_thresh
         self.output_data.category_index = self.category_index
         self.load_model()
-        self.update_interval_ms = 20
+        self.PREDICT_INTERVAL_MS = 20
 
     def load_model(self):
         print("Loading MTCNN Model")
@@ -52,8 +47,6 @@ class FacePredictor(AbstractPredictor):
 
     def predict_once(self,image_np):
         tracker_ids = []
-        #########################################
-
         # BGR -> RGB
         image_np = image_np[:,:,::-1]
         if image_np.ndim == 2:
@@ -109,7 +102,7 @@ class FacePredictor(AbstractPredictor):
             scores = scores[indices]
             boxes = boxes[indices]
             # Run the tracker
-            if self.TRACKER_TYPE != None:
+            if self.ENABLE_TRACKER:
                 [tracker_ids, boxes, scores, _] = self.runTracker(boxes,scores,
                                                                 image_np)
             self.output_data.bbs = boxes
@@ -120,27 +113,20 @@ class FacePredictor(AbstractPredictor):
 
         else:
             self.output_data.bbs = np.asarray([])
-        time.sleep(self.update_interval_ms/1000.0)
+        time.sleep(self.PREDICT_INTERVAL_MS/1000.0)
 
         #########################################
 
 
     def runTracker(self, boxes,scores, image_np):
-        if self.TRACKER_TYPE == self.TRACKER_LEGACY:
-            [tracker_ids, boxes,scores, _,
-                        _] = self.global_tracker.pipeline(boxes,
-                                                          scores,
-                                                          scores,
-                                                          image_np, return_tracker_id = True)
-        elif self.TRACKER_TYPE == self.TRACKER_DEEPSORT:
-            [tracker_ids, boxes,scores, classes] = self.global_tracker.runNew(boxes,scores,classes, image_np)
+        [tracker_ids, boxes,scores, _,
+                    _] = self.global_tracker.pipeline(boxes,
+                                                      scores,
+                                                      scores,
+                                                      image_np, return_tracker_id = True)
         return [tracker_ids, boxes,scores, _]
 
     def predict(self,threadName):
         while not self.done:
             image_np = self.getImage()
-            if not self.pause:
-                self.predict_once(image_np)
-            else:
-                self.output_data.bbs = np.asarray([])
-                time.sleep(2.0) # Sleep for 2 seconds
+            self.predict_once(image_np)

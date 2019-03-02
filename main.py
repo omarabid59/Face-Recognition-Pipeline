@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 from ImageInput import WebcamThread
-from Predictor.Wrapper import FaceDetectionRecognition as FaceNetRecog
+from Predictor.Wrapper import FaceDetectionRecognition as FaceDetectionRecognitionWrapper
 import matplotlib.pyplot as plt
 
 
@@ -29,14 +29,14 @@ def init_camera(resolution):
         time.sleep(0.1)
     print('Camera Initialized')
     return thread_image,image_data
-def init_pipeline():
-    thread_frm = FaceNetRecog(thread_image.image_data,
+def init_pipeline(thread_image):
+    wrapper = FaceDetectionRecognitionWrapper(thread_image.image_data,
                       '/home/watopedia/github_projects/aipod-data/face_recognition/train_datasets/watopedia-2018-10-13/svm_models/facenet_mtcnn_align/classifier.pkl',
                                  detector_thresh,
                                  recognition_thresh=recognition_thresh,
                                  detection_tracker=TRACKER,
                                  DETECTOR_IMG_SCALE = DETECTOR_IMG_SCALE)
-    return thread_frm;
+    return wrapper;
 
 
 
@@ -45,16 +45,16 @@ def init_pipeline():
 
 def run():
     thread_image,image_data = init_camera(RESOLUTIONS[2])
-    thread_frm = init_pipeline()
+    wrapper = init_pipeline(thread_image)
     faceFrame = draw_face_frame()
     while True:
         # Get the webcam image
         live_img = thread_image.image_data.image_np.copy()
         # Concatenate the output data from all of our threads.
-        output_data = thread_frm.output_data
+        output_data = wrapper.output_data
 
 
-        PERSONS = list(thread_frm.output_data.output_data.recognition_data.persons)
+        PERSONS = list(wrapper.output_data.output_data.recognition_data.persons)
 
         person_img = faceFrame.drawFaceRecognitionDisplayImage(PERSONS)
         live_img = faceFrame.drawDynamicBoundingBoxes(live_img, thread_frm.output_data.output_data)
