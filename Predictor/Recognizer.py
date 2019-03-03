@@ -78,7 +78,7 @@ class FaceRecognition(AbstractSubsetImgPredictor):
         return (persons, scores, tracker_ids)
 
     def predict(self, threadName):
-        intermediate_data = self.output_data.recognition_data.intermediate_data
+        recognition_data = self.output_data.recognition_data.recognition_data
         counter = 0
         while not self.done:
             if not self.pause:
@@ -90,9 +90,9 @@ class FaceRecognition(AbstractSubsetImgPredictor):
                 tracker_ids = []
                 time.sleep(1.0)
 
-            intermediate_data.scores = np.asarray(list(scores))
-            intermediate_data.classes = list(['frm:' + s for s in classes])
-            intermediate_data.tracker_ids = tracker_ids
+            recognition_data.scores = np.asarray(list(scores))
+            recognition_data.classes = list(['frm:' + s for s in classes])
+            recognition_data.tracker_ids = tracker_ids
             '''
             # Update the history after every 3rd recognition.
             if counter % 4 == 0:
