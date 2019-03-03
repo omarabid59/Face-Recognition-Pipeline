@@ -19,10 +19,15 @@ class HistoryAveraging():
 
             self.tracker_ids = []
             self.MAX_AGE = 5
-            self.persons = []
+            self.majority_persons = []
+            self.current_persons = []
             self.scores = []
             self.age = []
-
+    class CurrentRecognition():
+        def __init__(self):
+            self.persons = []
+            self.scores = []
+            self.trk_ids = []
     def updateOutputData(self):
         # Get a reference to make it easier to work with
 
@@ -47,7 +52,8 @@ class HistoryAveraging():
                 history.idle_age.append(0)
                 history.recognition_history.append(history.EMPTY_MAJORITY_ELEMENTS)
                 history.tracker_ids.append(tracker_id)
-                history.persons.append(history.EMPTY_ELEMENT)
+                history.majority_persons.append(history.EMPTY_ELEMENT)
+                history.current_persons.append(history.EMPTY_ELEMENT)
                 history.scores.append(0.0)
                 indx = len(history.age) - 1
 
@@ -56,12 +62,13 @@ class HistoryAveraging():
             [current_recognitions, majorityElement] = self.majorityVote(current_recognitions,
                                                                     person)
 
-            history.persons[indx] = majorityElement
+            history.majority_persons[indx] = majorityElement
+            history.current_persons[indx] = person
             history.scores[indx] = score
             history.recognition_history[indx] = current_recognitions
 
 
-        self.updateUnusedTrackers(history);
+        self.__updateUnusedTrackers(history);
 
         self.__detect_and_recognize_results(history);
 
@@ -70,7 +77,7 @@ class HistoryAveraging():
         This is the output we wish to utilize.
         '''
 
-        persons_ = list(history.persons)
+        persons_ = list(history.majority_persons)
         scores_ = list(history.scores)
 
 
@@ -99,9 +106,15 @@ class HistoryAveraging():
         self.results.bbs = bbs;
         self.results.persons = persons;
         self.results.scores = scores;
-    def detect_and_recognize_results():
-        return self.results;
-    def updateUnusedTrackers(history):
+
+    def detect_and_recognize_results(with_history):
+        if with_history:
+            return self.results;
+        else:
+            # TODO. Implementation required.
+            return self.results;
+
+    def __updateUnusedTrackers(history):
         '''
         Increment the unused trackers age by one and remove those that are
         too old.

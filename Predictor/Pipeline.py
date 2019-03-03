@@ -84,7 +84,8 @@ class FaceDTCM():
         TODO: Return the result of detection and recognition
         with_history: Returns the results using the history of previously recognized faces.
         '''
-        results = history_average.detect_and_recognize_results()
+        if with_history:
+            results = history_average.detect_and_recognize_results()
         return results
     def detect_only():
         '''
