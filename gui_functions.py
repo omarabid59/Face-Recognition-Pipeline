@@ -1,14 +1,8 @@
-import aipodMain.GUI.gui_loader_utils as gui_loader_utils
-import constants
 import cv2
 import numpy as np
 class draw_face_frame():
     def __init__(self):
-        self.FACE_DB_IMAGES_DIR = constants.FACE_DB_IMAGES_DIR
-        self.HEIGHT = constants.FRAME_FACERECOG_HEIGHT
-        self.WIDTH = constants.FRAME_FACERECOG_WIDTH
-
-        self.__loadModelFiles()
+        
 
         self.__font      = cv2.FONT_HERSHEY_SIMPLEX
         self.fontScale = 1.0
@@ -26,76 +20,22 @@ class draw_face_frame():
         self.__ALPHA_VALUES = list(np.linspace(self.__ALPHA_MIN,self.__ALPHA_MAX,num=10)) + list(np.linspace(self.__ALPHA_MAX,self.__ALPHA_MIN,num=7))
         self.__DYNAMIC_BOX_COUNTER = 0
 
-    def __loadModelFiles(self):
-        # Load the Face Identification
-        self.face_id_dict = gui_loader_utils.load_face_model_images(self.FACE_DB_IMAGES_DIR,
-                                                               self.WIDTH,
-                                                               self.HEIGHT)
-        print('Loaded 3D models: ' + str(self.face_id_dict.keys()))
-
-
-    def __updateFaceRecognitionDisplayImage(self, persons):
-        '''
-        Passes an array of strings and the face image database to return
-        the corresponding image of the person being detected.
-        Used to display image on the dashboard
-        '''
-        if len(persons) > 0:
-            if 'Alex' in persons[0]:
-                 current_face_model = self.face_id_dict['Alex']
-            elif 'Brent-Pass' in persons[0]:
-                 current_face_model = self.face_id_dict['Brent']
-            elif 'Carl-freer' in persons[0]:
-                 current_face_model = self.face_id_dict['Carl']
-            elif 'Haris' in persons[0]:
-                 current_face_model = self.face_id_dict['Haris']
-            elif 'Jan' in persons[0]:
-                 current_face_model = self.face_id_dict['Jan']
-            elif 'Lucie-parker' in persons[0]:
-                 current_face_model = self.face_id_dict['Lucie']
-            elif 'omar' in persons[0]:
-                 current_face_model = self.face_id_dict['Omar']
-            elif 'phanikumar' in persons[0]:
-                 current_face_model = self.face_id_dict['Phani']
-            else:
-                 current_face_model = self.face_id_dict['mask']
-        else:
-            current_face_model = self.face_id_dict['mask']
-        self.current_face_model = current_face_model
-
-    def drawFaceRecognitionDisplayImage(self,person_labels):
-        # Check if the label exists.
-        indices = [i for i, s in enumerate(person_labels) if 'frm' in s]
-        if len(indices) == 1:
-            persons = person_labels[indices[0]]
-            persons = persons.split(':')[1]
-        else:
-            persons = '--------'
-        self.__updateFaceRecognitionDisplayImage([persons])
-        return self.current_face_model
-
-
-    def drawDynamicBoundingBoxes(self,image_np, output_data,SCORES=False):
+    def drawDynamicBoundingBoxes(self,image_np, results_data,show_scores=False):
         """
         Identical to 'drawFaceBoundingBoxesAndLabel', except draws custom bouding boxes.
         """
 
         h,w,_ = image_np.shape
-        trk_ids = list(output_data.recognition_data.output_data.tracker_ids)
-        persons = list(output_data.recognition_data.output_data.classes)
-        scores = list(output_data.recognition_data.scores)
+        bbs = results_data.bbs;
+        scores = results_data.scores;
+        persons = results_data.persons;
 
 
-        for bb, detector_trk_id in zip(output_data.detection_data.bbs,
-                                       output_data.detection_data.tracker_ids):
-            try:
-                indx = trk_ids.index(detector_trk_id)
-                person = persons[indx]
-                if SCORES:
-                    person = person + ' ' + str(int(scores[indx]*100)) + '%'
-            except:
-                person = output_data.recognition_data.EMPTY_ELEMENT
-            person_text = person.split(':')[1]
+        for bb, score,person in zip(bbs,scores,persons):
+            person_label = person.split(':')[1]
+            if show_scores:
+                person_label = person_label + ' ' + str(int(score*100)) + '%'
+
             x = int(bb[1]*w)
             y = int(bb[0]*h)
             x_ = int(bb[3]*w)
@@ -125,7 +65,7 @@ class draw_face_frame():
                 self.__DYNAMIC_BOX_COUNTER = 0
 
 
-            image_np = self.gen_dynamic_image_label(person_text,x,y,image_np)
+            image_np = self.gen_dynamic_image_label(person_label,x,y,image_np)
         return image_np
 
     def gen_dynamic_image_label(self,text,x,y,image_np):
