@@ -20,7 +20,7 @@ class draw_face_frame():
         self.__ALPHA_VALUES = list(np.linspace(self.__ALPHA_MIN,self.__ALPHA_MAX,num=10)) + list(np.linspace(self.__ALPHA_MAX,self.__ALPHA_MIN,num=7))
         self.__DYNAMIC_BOX_COUNTER = 0
 
-    def drawDynamicBoundingBoxes(self,image_np, bbs,scores,persons,show_scores=False):
+    def drawBoxes(self,image_np, bbs,scores,persons,show_scores=False):
         """
         Identical to 'drawFaceBoundingBoxesAndLabel', except draws custom bouding boxes.
         """
