@@ -44,7 +44,9 @@ while True:
     image_np = thread_img.image_data.image_np.copy()
     results = face_pipeline.detect_and_recognize()
 
-    live_img = faceFrame.drawBoxes(image_np, results.bbs,results.scores,results.persons)
+    image_np = faceFrame.drawBoxes(image_np, results.bbs,results.scores,results.persons)
+    
+    cv2.imshow("Frame",image_np);
 
 
     cv2.destroyAllWindows()
