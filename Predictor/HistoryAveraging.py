@@ -61,11 +61,11 @@ class HistoryAveraging():
             history.recognition_history[indx] = current_recognitions
 
 
-        updateUnusedTrackers(history);
+        self.updateUnusedTrackers(history);
 
-        toResults(history);
+        self.__detect_and_recognize_results(history);
 
-    def toResults(history):
+    def __detect_and_recognize_results(history):
         '''
         This is the output we wish to utilize.
         '''
@@ -96,9 +96,11 @@ class HistoryAveraging():
             scores.append(score);
             persons.append(person);
             bbs.append(bb);
-        results.bbs = bbs;
-        results.persons = persons;
-        results.scores = scores;
+        self.results.bbs = bbs;
+        self.results.persons = persons;
+        self.results.scores = scores;
+    def detect_and_recognize_results():
+        return self.results;
     def updateUnusedTrackers(history):
         '''
         Increment the unused trackers age by one and remove those that are

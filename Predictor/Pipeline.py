@@ -5,6 +5,7 @@ from .Detector import FacePredictor
 from .Recognizer import FaceRecognition
 import ..constants as constants
 from ..helper_data_encapsulation import OutputFaceData
+from .HistoryAveraging import HistoryAveraging
 class FaceDTCM():
 
     def __init__(self,image_data,
@@ -24,6 +25,8 @@ class FaceDTCM():
         self.output_data = OutputFaceData()
 
 
+
+
         self.name = "thread_frm"
         self.isStarted = False
 
@@ -36,6 +39,8 @@ class FaceDTCM():
         self.thread_recognition = FaceRecognition(self.output_data,
                                                  SVM_CLASSIFIER_PATH,
                                                  NN_CLASSIFIER_PATH)
+
+        self.history_average = HistoryAveraging()
 
         self.output_data.detection_data = self.thread_detector.output_data;
         # Set default thresholds.
@@ -79,11 +84,8 @@ class FaceDTCM():
         TODO: Return the result of detection and recognition
         with_history: Returns the results using the history of previously recognized faces.
         '''
-        persons = self.output_data.results_data.persons;
-        bbs = self.output_data.results_data.bbs;
-        scores = self.output_data.results_data.scores;
-        
-        pass
+        results = history_average.detect_and_recognize_results()
+        return results
     def detect_only():
         '''
         TODO: Return the result of detection only.
