@@ -10,15 +10,16 @@ from ..DataHolder import DetectionData
 import time
 
 class FacePredictor(threading.Thread):
-    def __init__(self,PATH_TO_LABELS,
-                 image_data,
+    def __init__(self, image_data,
                   score_thresh,
                  IMG_SCALE):
 
 
+        FACE_DETECTOR_SSD_LABEL_PATH = ""
+        print("Predictor:Pipeline. Warning. FACE_DETECTOR_SSD_LABEL_PATH Should be automatically generated.")
         name = "MTCNN Face Predictor"
         super().__init__(name,
-                         PATH_TO_LABELS,
+                         FACE_DETECTOR_SSD_LABEL_PATH,
                          IMG_SCALE)
 
 

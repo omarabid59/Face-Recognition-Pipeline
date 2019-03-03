@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 from ImageInput import WebcamThread
-from Predictor.Wrapper import FaceDetectionRecognition as FaceDetectionRecognitionWrapper
+from Predictor.Pipeline import FaceDetectionRecognition as FaceDTCM
 import matplotlib.pyplot as plt
 
 
@@ -14,10 +14,11 @@ print("Finished Loading Imports")
 # Parameters
 detector_thresh = 0.8
 recognition_thresh = 0.5
-DETECTOR_IMG_SCALE = 0.5
 TRACKER = 'Legacy'
 RESOLUTIONS = [[640,480],[1280,720],[1920,1080]]
 FRAME_SCALE = 1.0
+SVM_CLASSIFIER = '/home/watopedia/github_projects/aipod-data/face_recognition/train_datasets/watopedia-2018-10-13/svm_models/facenet_mtcnn_align/classifier.pkl'
+NN_CLASSIFIER_PATH = 'UPDATE_PATH'
 
 def init_camera(resolution):
     thread_image = WebcamThread('camera',VIDEO_ID,
@@ -30,20 +31,14 @@ def init_camera(resolution):
     print('Camera Initialized')
     return thread_image,image_data
 def init_pipeline(thread_image):
-    wrapper = FaceDetectionRecognitionWrapper(thread_image.image_data,
-                      '/home/watopedia/github_projects/aipod-data/face_recognition/train_datasets/watopedia-2018-10-13/svm_models/facenet_mtcnn_align/classifier.pkl',
-                                 detector_thresh,
-                                 recognition_thresh=recognition_thresh,
-                                 detection_tracker=TRACKER,
-                                 DETECTOR_IMG_SCALE = DETECTOR_IMG_SCALE)
+    wrapper = FaceDTCM(thread_image.image_data,
+                        SVM_CLASSIFIER,
+                        NN_CLASSIFIER_PATH,
+                        detector_thresh = detector_thresh,
+                        recognition_thresh=recognition_thresh)
     return wrapper;
 
-
-
-
-
-
-def run():
+def run_live():
     thread_image,image_data = init_camera(RESOLUTIONS[2])
     wrapper = init_pipeline(thread_image)
     faceFrame = draw_face_frame()
@@ -52,8 +47,6 @@ def run():
         live_img = thread_image.image_data.image_np.copy()
         # Concatenate the output data from all of our threads.
         output_data = wrapper.output_data
-
-
         PERSONS = list(wrapper.output_data.output_data.recognition_data.persons)
 
         person_img = faceFrame.drawFaceRecognitionDisplayImage(PERSONS)
@@ -61,3 +54,9 @@ def run():
 
 
         cv2.destroyAllWindows()
+def train_classifier():
+    '''
+    TODO: Implementation required. Should take in a set of images and train a classifier.
+    Alternatively, use a pre-existing SVM classifier.
+    '''
+    pass
