@@ -41,10 +41,10 @@ face_pipeline.startAll()
 faceFrame = draw_face_frame()
 while True:
     # Get the webcam image
-    live_img = thread_img.image_data.image_np.copy()
+    image_np = thread_img.image_data.image_np.copy()
     results = face_pipeline.detect_and_recognize()
 
-    live_img = faceFrame.drawDynamicBoundingBoxes(live_img, results.bbs,results.scores,results.persons)
+    live_img = faceFrame.drawBoxes(image_np, results.bbs,results.scores,results.persons)
 
 
     cv2.destroyAllWindows()
