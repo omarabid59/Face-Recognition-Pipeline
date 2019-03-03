@@ -47,12 +47,13 @@ class FaceDTCM():
         if self.isStarted == False:
             self.thread_detector.start()
             self.thread_recognition.start()
-            self.continue_predictor()
+            self.thread_detector.continue_predictor()
+            self.thread_recognition.continue_predictor()
             self.isStarted = True
     def setThresholds(self, detector_thresh=0.6, recognition_thresh=0.6):
         """
         detector_thresh:
-            Threshold for our SSD mobilenet detection of faces. Increase of false detections.
+            Threshold for our MTCNN mobilenet detection of faces.
         recognition_thresh:
             Threshold for classification.
         """
@@ -69,12 +70,27 @@ class FaceDTCM():
         self.thread_detector.update_interval_ms = detector_ms
         self.thread_recognition.update_interval_ms = recognition_ms
 
-    def pause_predictor(self):
-        self.thread_detector.pause_predictor()
-        self.thread_recognition.pause_predictor()
-    def continue_predictor(self):
-        self.thread_detector.continue_predictor()
-        self.thread_recognition.continue_predictor()
+
     def stop(self):
         self.thread_detector.stop()
         self.thread_recognition.stop()
+    def detect_and_recognize(with_history=True):
+        '''
+        TODO: Return the result of detection and recognition
+        with_history: Returns the results using the history of previously recognized faces.
+        '''
+        persons = self.output_data.results_data.persons;
+        bbs = self.output_data.results_data.bbs;
+        scores = self.output_data.results_data.scores;
+        
+        pass
+    def detect_only():
+        '''
+        TODO: Return the result of detection only.
+        '''
+        pass
+    def recognize_only(detection_data):
+        '''
+        TODO: Return the result of recognition given detection data
+        '''
+        pass

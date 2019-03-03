@@ -63,11 +63,42 @@ class HistoryAveraging():
 
         updateUnusedTrackers(history);
 
-        # This is the output we wish to utilize.
-        #results.tracker_ids = history.tracker_ids
-        results.persons = history.persons
-        results.scores = history.scores
-        results.bbs = history.bbs
+        toResults(history);
+
+    def toResults(history):
+        '''
+        This is the output we wish to utilize.
+        '''
+
+        persons_ = list(history.persons)
+        scores_ = list(history.scores)
+
+
+        trk_ids_rcg = list(self.recognition_data.tracker_ids)
+        trk_ids_det = list(self.detection_data.tracker_ids)
+        bbs_detected = list(self.detection_data.bbs)
+
+
+        bbs = []
+        persons = []
+        scores = []
+        for bb, detector_trk_id in zip(bbs_detected,
+                                       trk_ids_det:
+            try:
+                indx = trk_ids_rcg.index(detector_trk_id)
+                person = persons[indx]
+                #if SCORES:
+                #    person = person + ' ' + str(int(scores[indx]*100)) + '%'
+                score = scores[indx]
+            except:
+                person = self.EMPTY_ELEMENT
+                score = -1;
+            scores.append(score);
+            persons.append(person);
+            bbs.append(bb);
+        results.bbs = bbs;
+        results.persons = persons;
+        results.scores = scores;
     def updateUnusedTrackers(history):
         '''
         Increment the unused trackers age by one and remove those that are
